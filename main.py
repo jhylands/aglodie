@@ -19,7 +19,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     """ Route to render the HTML """
-    return jsonify([get_my_item()])
+    return render_template("index.html")
 
 
 
