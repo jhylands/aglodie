@@ -55,42 +55,88 @@ var config = {
 };
 
 //add event loop to poll every second for data.
-user_id=1;
+var user_id=1;
+function bid_offer_handler(){
+  this.bid_price = 0;
+  this.bid_quantity = 0;
+  this.offer_price = 0;
+  this.offer_quantity = 0;
+  this.update_ui_quantities = function(){
+    var form = document.getElementById("bid_form");
+    // For each of the boxes update to what we have stored here
+    form.elements["offer_price"].value = this.offer_price;
+    form.elements["offer_quantity"].value = this.offer_quantity;
+    form.elements["bid_price"].value = this.bid_price;
+    form.elements["bid_quantity"].value = this.bid_quantity;
+  }
+  this.gather_ui_quantities = function(){
+    var form = document.getElementById("bid_form");
+    // For each of the boxes update to what we have stored here
+    this.offer_price = form.elements["offer_price"].value;
+    this.offer_quantity = form.elements["offer_quantity"].value;
+    this.bid_price = form.elements["bid_price"].value;
+    this.bid_quantity = form.elements["bid_quantity"].value;
+  }
+};
+var orders = new bid_offer_handler();
+
+function on_successful_update_reqest(result){ // Has to be there !
+  //Add the data to the graph
+  user_data = result.user_data;
+  price_data = result.price_data;
+  update_user_offers(user_data);
+  update_price_history(price_data);
+};
+
+function update_user_offers(user_data){
+  //need to update the values from bid_offer_handler
+  //validate that result has the values needed.
+  orders.bid_price = user_data.bid.price;
+  orders.bid_quantity = user_data.bid.quantity;
+  orders.offer_price = user_data.offer.price;
+  orders.offer_quantity = user_data.offer.quantity;
+  orders.update_ui_quantities();
+};
+function update_price_history(price_data){
+  if (config.data.datasets.length > 0) {
+    var month = MONTHS[config.data.labels.length % MONTHS.length];
+    config.data.labels.push(month);
+    config.data.datasets.forEach(function(dataset) {
+    // source https://stackoverflow.com/a/62519003/1320619
+        if (dataset.data.length > 20) {
+          // Remove the oldest data and label
+          dataset.data.shift();
+          config.data.labels.shift();
+        }
+        price_data.forEach(function(data){
+          dataset.data.push(data);
+        })
+    });
+
+    window.myLine.update();
+      }
+ }
+
+
+function main_loop(){
+  $.ajax({
+     url : '/update', //PHP file to execute
+     dataType: 'json',
+     type: 'post',
+     contentType: 'application/json',
+     data: JSON.stringify({user_id : user_id}), // Parameters passed to the server
+     success: on_successful_update_reqest,
+     error : function(result, statut, error){ // Handle errors
+     }
+  });
+}
+
+
+
 window.onload = function() {
   var ctx = document.getElementById('canvas').getContext('2d');
   window.myLine = new Chart(ctx, config);
-  window.setInterval(function(){
-    $.ajax({
-       url : '/update', //PHP file to execute
-       dataType: 'json',
-       type: 'post',
-       contentType: 'application/json',
-       data: JSON.stringify({user_id : user_id}), // Parameters passed to the server
-       success : function(result){ // Has to be there !
-          //Add the data to the graph
-              if (config.data.datasets.length > 0) {
-                  var month = MONTHS[config.data.labels.length % MONTHS.length];
-                  config.data.labels.push(month);
-                  config.data.datasets.forEach(function(dataset) {
-                  // source https://stackoverflow.com/a/62519003/1320619
-                      if (dataset.data.length > 20) {
-                        // Remove the oldest data and label
-                        dataset.data.shift();
-                        config.data.labels.shift();
-                      }
-                      result.price_data.forEach(function(data){
-                        dataset.data.push(data);
-                      })
-                  });
-
-                  window.myLine.update();
-              }
-       },
-       error : function(result, statut, error){ // Handle errors
-
-       }
-    });
-  }, 1000);
+  window.setInterval(main_loop, 1000);
 };
 
 

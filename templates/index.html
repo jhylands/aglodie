@@ -21,8 +21,7 @@
         <canvas id="canvas"></canvas>
     </div>
     <div style="position:absolute;right:0px;top:0px;padding:10px;" />
-    <button id="addData">Add Data</button>
-    <form>
+    <form id="bid_form">
     <table>
     <tr><th></th><th>Price</th><th>Quantity</th></tr>
     <tr><td>Offer</td><td><input type="number" name="offer_price" /></td><td><input type="number" name="offer_quantity" /></td></tr>
@@ -31,8 +30,8 @@
     <input type="submit" />
     </form>
     <ul>
-    <li>Holding:</li>
-    <li>Cash:</li>
+    <li>Holding:<span id="holding_value">0</span></li>
+    <li>Cash: £<span id="cash_value">0</span></li>
     </ul>
     
     </div>
