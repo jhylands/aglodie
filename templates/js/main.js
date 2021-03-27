@@ -78,13 +78,30 @@ function bid_offer_handler(){
     this.bid_quantity = form.elements["bid_quantity"].value;
   }
 };
+function update_orders_from_ui(){
+  orders.gather_ui_quantities();
+};
+function User(){
+  this.id = 1;
+  this.cash=100;
+  this.holding=0;
+  this.update_ui_quantities = function(){
+    var cash = document.getElementById("cash_value");
+    cash.value = this.cash;
+    var holding = document.getElementById("holding_value");
+    holding.value = this.holding;
+  };
+}
+
 var orders = new bid_offer_handler();
+var user = new User();
 
 function on_successful_update_reqest(result){ // Has to be there !
   //Add the data to the graph
   user_data = result.user_data;
   price_data = result.price_data;
   update_user_offers(user_data);
+  update_user(user_data);
   update_price_history(price_data);
 };
 
@@ -97,6 +114,11 @@ function update_user_offers(user_data){
   orders.offer_quantity = user_data.offer.quantity;
   orders.update_ui_quantities();
 };
+function update_user(user_data){
+  user.cash = user_data.cash;
+  user.holding = user_data.holding;
+  user.update_ui_quantities();
+}
 function update_price_history(price_data){
   if (config.data.datasets.length > 0) {
     var month = MONTHS[config.data.labels.length % MONTHS.length];
