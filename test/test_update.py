@@ -13,3 +13,9 @@ def test_update():
     print(payload.keys())
     assert "user_data" in payload
     assert set(["shares", "cash", "bid", "offer"]).issubset(set(payload["user_data"].keys()))
+
+    
+    user_payload= {"user_id": "1", "bid":{"price": 1, "quantity": 10}}
+    response = requests.post("http://localhost:8008/update", headers=headers, data=json.dumps(user_payload))
+    payload = json.loads(response.text)
+    assert payload["user_data"]["bid"]["price"] == 1

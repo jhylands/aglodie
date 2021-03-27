@@ -18,8 +18,26 @@ def get_user_data(cache, user_id):
         cache.set(user_id, json.dumps({"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}}))
         return json.loads(cache.get(user_id))
     else:
-        print(rv)
         return json.loads(rv)
+
+
+def update_user_data(cache, user_data):
+    user_id = user_data["user_id"]
+    if "bid" in user_data:
+        # given the old user data variable becomes the new user data
+        # a better name should probably be chosen
+        old_user_data = json.loads(cache.get(str(user_id)))
+        old_user_data["bid"] = user_data["bid"]
+        cache.set(str(user_id), json.dumps(old_user_data))
+    if "offer" in user_data:
+        # given the old user data variable becomes the new user data
+        # a better name should probably be chosen
+        old_user_data = json.loads(cache.get(str(user_id)))
+        old_user_data["offer"] = user_data["offer"]
+        cache.set(str(user_id), json.dumps(old_user_data))
+    
+        
+    
 
 
 
@@ -39,14 +57,20 @@ def send_js(path):
 
 @app.route("/update", methods=["POST"])
 def update():
-    cache = base.Client(('127.0.0.1', 11211,))
+    # needs some extra validation on the structure of the payload
     try:
-        user_id = request.json["user_id"]
-    except (TypeError, KeyError) as ex:
+        payload = request.json
+    except (TypeError) as ex:
         print(ex)
         abort(400)
+    if payload.get("user_id") is None:
+        abort(400)
+    else:
+        user_id = payload["user_id"]
+    cache = base.Client(('127.0.0.1', 11211,))
+    update_user_data(cache, payload)
     response = {"price_data": get_price_data(cache), "user_data":get_user_data(cache, user_id)}
-    print(dir(cache))
+    cache.close()
     return jsonify(response)
 
 
