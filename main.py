@@ -1,24 +1,25 @@
-from flask import Flask, render_template, request, jsonify, make_response, send_from_directory
+from flask import Flask, render_template, request, jsonify, make_response, send_from_directory, abort
+import json
 # Source https://realpython.com/python-memcache-efficient-caching/
 from pymemcache.client import base
-cache = base.Client(('127.0.0.1', 11211,))
 
 
-def get_price_data():
+def get_price_data(cache):
     rv = cache.get('price_data')
     if rv is None:
-        cache.set('price_data', [0])
+        cache.set('price_data', json.dumps([0]))
         return [0]
-    return rv
+    return json.loads(rv)
 
 
-def get_user_data(user_id):
+def get_user_data(cache, user_id):
     rv = cache.get(user_id)
     if rv is None:
-        cache.set(user_id, {"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}})
-        return cache.get(user_id)
+        cache.set(user_id, json.dumps({"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}}))
+        return json.loads(cache.get(user_id))
     else:
-        return rv
+        print(rv)
+        return json.loads(rv)
 
 
 
@@ -38,8 +39,14 @@ def send_js(path):
 
 @app.route("/update", methods=["POST"])
 def update():
-    user_id = request.json()["user_id"]
-    response = {"price_data": get_price_data(), "user_data":get_user_data(user_id)}
+    cache = base.Client(('127.0.0.1', 11211,))
+    try:
+        user_id = request.json["user_id"]
+    except (TypeError, KeyError) as ex:
+        print(ex)
+        abort(400)
+    response = {"price_data": get_price_data(cache), "user_data":get_user_data(cache, user_id)}
+    print(response)
     return jsonify(response)
 
 
