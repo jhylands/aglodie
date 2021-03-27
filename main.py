@@ -13,7 +13,7 @@ def get_price_data(cache):
 
 
 def get_user_data(cache, user_id):
-    rv = cache.get(user_id)
+    rv = cache.get(str(user_id))
     if rv is None:
         cache.set(user_id, json.dumps({"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}}))
         return json.loads(cache.get(user_id))
@@ -46,7 +46,7 @@ def update():
         print(ex)
         abort(400)
     response = {"price_data": get_price_data(cache), "user_data":get_user_data(cache, user_id)}
-    print(response)
+    print(dir(cache))
     return jsonify(response)
 
 
