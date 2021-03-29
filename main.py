@@ -29,12 +29,14 @@ def update_user_data(cache, user_data):
         old_user_data = json.loads(cache.get(str(user_id)))
         old_user_data["bid"] = user_data["bid"]
         cache.set(str(user_id), json.dumps(old_user_data))
+        print("bid updated", user_data["bid"])
     if "offer" in user_data:
         # given the old user data variable becomes the new user data
         # a better name should probably be chosen
         old_user_data = json.loads(cache.get(str(user_id)))
         old_user_data["offer"] = user_data["offer"]
         cache.set(str(user_id), json.dumps(old_user_data))
+        print("offer updated", user_data["offer"])
     
         
     

@@ -27,12 +27,18 @@
     <tr><td>Offer</td><td><input type="number" name="offer_price" /></td><td><input type="number" name="offer_quantity" /></td></tr>
     <tr><td>Bid</td><td><input type="number" name="bid_price" /></td><td><input type="number" name="bid_quantity" /></td></tr>
     </table>
-    <input type="button" onclick="update_orders_from_ui();" />
+    <input value="Submit order" type="button" onclick="update_orders_from_ui();" />
     </form>
     <ul>
     <li>Holding:<span id="holding_value">0</span></li>
     <li>Cash: £<span id="cash_value">0</span></li>
     </ul>
+    <h2> Open orders</h2>
+    <table>
+    <tr><th></th><th>Price</th><th>Quantity</th></tr>
+    <tr><td>Offer</td><td><span id="current_offer_price" ></span></td><td><span id="current_offer_quantity" ></span></td></tr>
+    <tr><td>Bid</td><td><span id="current_bid_price" ></span></td><td><span id="current_bid_quantity" ></span></td></tr>
+    </table>
     
     </div>
 </body>

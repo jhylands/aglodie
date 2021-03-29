@@ -58,17 +58,47 @@ var config = {
 var user_id=1;
 function bid_offer_handler(){
   this.bid_price = 0;
+  this.set_bid_price = function (bid_price){
+    if(bid_price!==this.bid_price){
+      this.bid_price = bid_price;
+      this.values_updated = true;
+    }
+  };
   this.bid_quantity = 0;
+  this.set_bid_quantity = function (bid_quantity){
+    if(bid_quantity!==this.bid_quantity){
+      this.bid_quantity = bid_quantity;
+      this.values_updated = true;
+    }
+  };
   this.offer_price = 0;
+  this.set_offer_price = function (offer_price){
+    if(offer_price!==this.offer_price){
+      this.offer_price = offer_price;
+      this.values_updated = true;
+    }
+  };
   this.offer_quantity = 0;
+  this.set_offer_quantity = function (offer_quantity){
+    if(offer_quantity!==this.offer_quantity){
+      this.offer_quantity = offer_quantity;
+      this.values_updated = true;
+    }
+  };
   this.update_ui_quantities = function(){
+    document.getElementById("current_offer_price").innerHTML = "£" + this.offer_price;
+    document.getElementById("current_offer_quantity").innerHTML = this.offer_quantity;
+    document.getElementById("current_bid_price").innerHTML = "£" + this.bid_price;
+    document.getElementById("current_bid_quantity").innerHTML = this.bid_quantity;
+  };
+  this.reset_form = function(){
     var form = document.getElementById("bid_form");
     // For each of the boxes update to what we have stored here
-    form.elements["offer_price"].value = this.offer_price;
-    form.elements["offer_quantity"].value = this.offer_quantity;
-    form.elements["bid_price"].value = this.bid_price;
-    form.elements["bid_quantity"].value = this.bid_quantity;
-  }
+    form.elements["offer_price"].value = 0;
+    form.elements["offer_quantity"].value = 0;
+    form.elements["bid_price"].value = 0;
+    form.elements["bid_quantity"].value = 0;
+  };
   this.gather_ui_quantities = function(){
     var form = document.getElementById("bid_form");
     // For each of the boxes update to what we have stored here
@@ -76,11 +106,15 @@ function bid_offer_handler(){
     this.offer_quantity = form.elements["offer_quantity"].value;
     this.bid_price = form.elements["bid_price"].value;
     this.bid_quantity = form.elements["bid_quantity"].value;
-  }
-};
+    this.reset_form();
+  };
+}
+
 function update_orders_from_ui(){
   orders.gather_ui_quantities();
+  update_position();
 };
+
 function User(){
   this.id = 1;
   this.cash=100;
@@ -96,14 +130,14 @@ function User(){
 var orders = new bid_offer_handler();
 var user = new User();
 
-function on_successful_update_reqest(result){ // Has to be there !
+function on_successful_update_request(result){ // Has to be there !
   //Add the data to the graph
-  user_data = result.user_data;
-  price_data = result.price_data;
+  var user_data = result.user_data;
+  var price_data = result.price_data;
   update_user_offers(user_data);
   update_user(user_data);
   update_price_history(price_data);
-};
+}
 
 function update_user_offers(user_data){
   //need to update the values from bid_offer_handler
@@ -113,7 +147,7 @@ function update_user_offers(user_data){
   orders.offer_price = user_data.offer.price;
   orders.offer_quantity = user_data.offer.quantity;
   orders.update_ui_quantities();
-};
+}
 function update_user(user_data){
   user.cash = user_data.cash;
   user.holding = user_data.holding;
@@ -125,32 +159,45 @@ function update_price_history(price_data){
     config.data.labels.push(month);
     config.data.datasets.forEach(function(dataset) {
     // source https://stackoverflow.com/a/62519003/1320619
-        if (dataset.data.length > 20) {
-          // Remove the oldest data and label
-          dataset.data.shift();
-          config.data.labels.shift();
-        }
-        price_data.forEach(function(data){
-          dataset.data.push(data);
-        })
+      if (dataset.data.length > 20) {
+        // Remove the oldest data and label
+        dataset.data.shift();
+        config.data.labels.shift();
+      }
+      price_data.forEach(function(data){
+        dataset.data.push(data);
+      });
     });
 
     window.myLine.update();
-      }
- }
+  }
+}
 
+function request_update(data, success, failure){
+  $.ajax({
+    url : "/update", //PHP file to execute
+    dataType: "json",
+    type: "post",
+    contentType: "application/json",
+    // could probably do with only sending the extra information when there is a change
+    data: data,
+    success: success,
+    error : failure
+  });
+}
+
+function update_position(){
+  var data = JSON.stringify({
+    user_id : user_id, 
+    bid:{price: orders.bid_price, quantity: orders.bid_quantity},
+    offer:{price: orders.offer_price, quantity: orders.offer_quantity}}); // Parameters passed to the server
+
+  request_update(data, on_successful_update_request, function(result, statut, error){});
+}
 
 function main_loop(){
-  $.ajax({
-     url : '/update', //PHP file to execute
-     dataType: 'json',
-     type: 'post',
-     contentType: 'application/json',
-     data: JSON.stringify({user_id : user_id}), // Parameters passed to the server
-     success: on_successful_update_reqest,
-     error : function(result, statut, error){ // Handle errors
-     }
-  });
+  var data = JSON.stringify({user_id : user_id});
+  request_update(data, on_successful_update_request, function(result, statut, error){});
 }
 
 
