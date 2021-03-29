@@ -1,20 +1,24 @@
-from order import Order, Bid, Offer
+from typing import Union
 import json
+
 
 class User:
     def __init__(self):
         self.id = None
         self.cash = 0
         self.holding = 0
-        self.bid = None
-        self.offer = None
+        self.bid_price = 0
+        self.bid_quantity = 0
+        self.offer_price = 0
+        self.offer_quantity = 0
 
     @staticmethod
-    def from_json(json_content):
-        if isinstance(json_content, str):
-            json_content = json.loads(json_content)
-        elif isinstance(json_content, dict):
-            pass
+    def from_json(content):
+        # type: (Union[dict, str])->User
+        if isinstance(content, str):
+            json_content = json.loads(content)  # type: dict
+        elif isinstance(content, dict):
+            json_content = content  # type: dict
         else:
             raise Exception("Not valid json content")
         user = User()
@@ -22,7 +26,9 @@ class User:
         user.cash = json_content["cash"]
         user.holding = json_content["holding"]
         bid_content = json_content["bid"]
-        user.bid = Bid(user, bid_content["price"], bid_content["quantity"])
+        user.bid_price = bid_content["price"]
+        user.bid_quantity = bid_content["quantity"]
         offer_content = json_content["offer"]
-        user.offer = Offer(user, offer_content["price"], offer_content["quantity"])
+        user.offer_price = offer_content["price"]
+        user.offer_quantity = offer_content["quantity"]
         return user

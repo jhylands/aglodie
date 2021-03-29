@@ -1,35 +1,29 @@
 from pymemcache.client import base
-from collections import namedtuple
+from user import User
+from order_stack import BidStack, OfferStack
+from tradematcher import do_trading 
+from typing import List, Dict
+from time import sleep
 
-def extract_bid(user_data):
-    # type: (Dict)->Tuple[Bid, Bid]
+def extract_user(user_data):
+    # type: (Dict)->User
     #{"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}}
-    bid_quantity = user_data["bid"]["quantity"]
-    bid_price = user_data["bid"]["price"]
-    offer_quantity = user_data["offer"]["quantity"]
-    offer_price = user_data["offer"]["price"]
-    return Bid(bid_price, bid_quantity), Bid(offer_price, offer_quantity)
+    return User.from_json(user_data)
     
 
-def extract_bids(cache):
-    users = cache.get("users") or []
+def read_users(cache):
+    # type: (base.Client)->List[User]
+    user_ids = cache.get("users") or []
+    users = []
+    for user_id in user_ids:
+        user_data = cache.get(str(user_id))
+        users.append(extract_user(user_data))
+    return users
+
+def write_users(cache, users):
+    # type: (base.Client, List[User])->None
     for user in users:
-        user_data = cache.get(str(user))
-        bid, offer = extract_bid(user_data)
-    
-    return bids
-
-
-class BidderCantAfford(Exception):
-    pass
-
-class OfferCantProvide(Exception):
-    pass
-
-class NeitherPartyValid(Exception):
-    pass
-
-    
+        cache.set(str(user.id), str(user))
 
 
 def main():
@@ -37,8 +31,13 @@ def main():
         # connect to the database
         cache = base.Client(('127.0.0.1', 11211,))
         # gather the bids and offers
-
-        # if any match match them
+        users = read_users(cache)
+        bid_stack = BidStack.from_user_list(users)
+        offer_stack = OfferStack.from_user_list(users)
+        do_trading(bid_stack, offer_stack)
+        write_users(users)
+        # some kind of delay
+        sleep(0.1)
 
 if __name__=="__main__":
     main()
