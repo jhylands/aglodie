@@ -32,3 +32,16 @@ class User:
         user.offer_price = offer_content["price"]
         user.offer_quantity = offer_content["quantity"]
         return user
+
+    def __str__(self):
+        return json.dumps({
+            "user_id":self.id,
+            "cash": self.cash,
+            "holding": self.holding,
+            "bid": {
+                "price": self.bid_price,
+                "quantity": self.bid_quantity},
+            "offer": {
+                "price": self.offer_price,
+                "quantity": self.offer_quantity}
+        })

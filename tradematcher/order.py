@@ -13,12 +13,17 @@ class Order:
         # type: (User)->Order
         raise Exception("Not overwritten")
 
+    def __str__(self):
+        return "Price: %s, QTY: %s"%(self.price, self.quantity) 
+    def __repr__(self):
+        return str(self)
+
 
 class Bid(Order):
 
     @staticmethod
     def user_can_bid(user):
-        return user.bid_quantity>0 and user.cash>user.bid_quantity*user.bid_price
+        return user.bid_quantity>0 and user.cash>=user.bid_quantity*user.bid_price
 
     @staticmethod
     def from_user(user):
@@ -29,9 +34,9 @@ class Bid(Order):
 class Offer(Order):
     @staticmethod
     def user_can_offer(user):
-        return user.offer.quantity>0 and user.holding>user.offer.quantity
+        return user.offer_quantity>0 and user.holding>=user.offer_quantity
 
     @staticmethod
     def from_user(user):
         # type: (User)->Offer
-        return Offer(user, user.offer.price, user.offer.quantity)
+        return Offer(user, user.offer_price, user.offer_quantity)

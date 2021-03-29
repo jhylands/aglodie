@@ -1,7 +1,7 @@
 from pymemcache.client import base
 from user import User
 from order_stack import BidStack, OfferStack
-from tradematcher import do_trading 
+from tradematcher.trade import do_trading 
 from typing import List, Dict
 from time import sleep
 
@@ -35,7 +35,7 @@ def main():
         bid_stack = BidStack.from_user_list(users)
         offer_stack = OfferStack.from_user_list(users)
         do_trading(bid_stack, offer_stack)
-        write_users(users)
+        write_users(cache, users)
         # some kind of delay
         sleep(0.1)
 

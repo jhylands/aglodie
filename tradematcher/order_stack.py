@@ -1,5 +1,5 @@
 from typing import List
-from order import Order, Offer, Bid
+from tradematcher.order import Order, Offer, Bid
 from user import User
 
 class EndOfOrders(Exception):
@@ -26,10 +26,13 @@ class OrderStack:
 
     @property
     def top_price(self):
-        self.top.price
+        return self.top.price
 
     def sort(self):
         raise Exception("Not overwritten")
+
+    def __str__(self):
+        return str(self.orders)
 
 
 class BidStack(OrderStack):
@@ -50,4 +53,4 @@ class OfferStack(OrderStack):
     @staticmethod
     def from_user_list(users):
         # type: (List[User])->BidStack
-        return BidStack([Offer.from_user(user) for user in users if Offer.user_can_offer(user)])
+        return OfferStack([Offer.from_user(user) for user in users if Offer.user_can_offer(user)])
