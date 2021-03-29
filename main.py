@@ -15,6 +15,9 @@ def get_price_data(cache):
 def get_user_data(cache, user_id):
     rv = cache.get(str(user_id))
     if rv is None:
+        users = cache.get("users") or []
+        users.append(user_id)
+        cache.set("users", users) 
         cache.set(user_id, json.dumps({"shares":0, "cash":100, "bid":{"price":0, "quantity":0}, "offer":{"price":0, "quantity":0}}))
         return json.loads(cache.get(user_id))
     else:
