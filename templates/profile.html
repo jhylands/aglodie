@@ -1,9 +1,50 @@
-<!-- templates/profile.html -->
-
 {% extends "base.html" %}
-
 {% block content %}
-<h1 class="title">
-  Welcome, {{ name }}!
-</h1>
+<html>
+
+<head>
+    <title>Line Chart</title>
+    <script>var user_id = {{user_id}};</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/main.js"></script>
+    <style>
+    canvas{
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+    </style>
+</head>
+
+<body>
+    <div style="width:75%;">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div style="position:absolute;right:0px;top:0px;padding:10px;" />
+    <form id="bid_form">
+    <table>
+    <tr><th></th><th>Price</th><th>Quantity</th></tr>
+    <tr><td>Offer</td><td><input type="number" name="offer_price" /></td><td><input type="number" name="offer_quantity" /></td></tr>
+    <tr><td>Bid</td><td><input type="number" name="bid_price" /></td><td><input type="number" name="bid_quantity" /></td></tr>
+    </table>
+    <input value="Submit order" type="button" onclick="update_orders_from_ui();" />
+    </form>
+    <ul>
+    <li>Holding:<span id="holding_value">0</span></li>
+    <li>Cash: £<span id="cash_value">0</span></li>
+    </ul>
+    <h2> Open orders</h2>
+    <table>
+    <tr><th></th><th>Price</th><th>Quantity</th></tr>
+    <tr><td>Offer</td><td><span id="current_offer_price" ></span></td><td><span id="current_offer_quantity" ></span></td></tr>
+    <tr><td>Bid</td><td><span id="current_bid_price" ></span></td><td><span id="current_bid_quantity" ></span></td></tr>
+    </table>
+    
+    </div>
+</body>
+
+</html>
+
 {% endblock %}

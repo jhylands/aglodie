@@ -1,7 +1,13 @@
 from flask import Flask, render_template, request, jsonify, make_response, send_from_directory, abort
+from flask_login import login_required, current_user
+
 import json
 # Source https://realpython.com/python-memcache-efficient-caching/
 from pymemcache.client import base
+from models import User
+from flask_login import LoginManager
+from db import db
+from auth import auth as auth_blueprint
 
 
 def get_price_data(cache):
@@ -55,6 +61,12 @@ def index():
     return render_template("index.html")
 
 
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', user_id=current_user.id)
+
+
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('templates/js', path)
@@ -80,4 +92,20 @@ def update():
 
 
 if __name__ == "__main__":
+    app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+
+    db.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        # since the user_id is just the primary key of our user table, use it in the query for the user
+        return User.query.get(int(user_id))
+
+    # blueprint for auth routes in our app
+    app.register_blueprint(auth_blueprint)
     app.run(port=8008, host="0.0.0.0")

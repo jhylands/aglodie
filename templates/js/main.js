@@ -54,8 +54,6 @@ var config = {
     }
 };
 
-//add event loop to poll every second for data.
-var user_id=1;
 function bid_offer_handler(){
   this.bid_price = 0;
   this.set_bid_price = function (bid_price){
