@@ -1,5 +1,5 @@
-from order import Bid, Offer
-from order_stack import BidStack, OfferStack, EndOfOrders
+from tradematcher.order import Bid, Offer
+from tradematcher.order_stack import BidStack, OfferStack, EndOfOrders
 from typing import Optional
 from user import User
 

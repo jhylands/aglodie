@@ -6,7 +6,7 @@ import json
 from pymemcache.client import base
 from models import User
 from flask_login import LoginManager
-from db import db
+from db.db import db
 from auth import auth as auth_blueprint
 
 

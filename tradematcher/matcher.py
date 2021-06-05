@@ -1,6 +1,6 @@
 from pymemcache.client import base
 from user import User
-from order_stack import BidStack, OfferStack
+from tradematcher.order_stack import BidStack, OfferStack
 from tradematcher.trade import do_trading 
 from typing import List, Dict
 from time import sleep
